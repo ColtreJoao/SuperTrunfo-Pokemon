@@ -48,6 +48,7 @@ def rodadas_jogo():
 # Criar uma janela
 root = Tk()
 root.title("Jogo de Cartas")
+root.geometry("1920x1080")  # Definindo a resolução da janela
 
 # Função para exibir as regras
 def exibir_regras():
@@ -62,6 +63,7 @@ def exibir_historico():
     historico.title("Histórico do Jogo")
     texto = Label(historico, text="Histórico do Jogo Aqui")
     texto.pack()
+
 # Função para sair do jogo
 def sair_jogo():
     root.destroy()
