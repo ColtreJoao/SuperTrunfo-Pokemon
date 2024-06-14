@@ -67,7 +67,7 @@ def jogo_super_trunfo():
         carta_computador = cartas_computador.pop(0)  # Remove e retorna a primeira carta da lista de cartas do computador
         
         print(f"Sua carta: {carta_jogador}")
-        
+    
 
         atributo = input("Escolha um atributo para comparar (ataque, defesa, ataque esp, defesa esp, velocidade): ")
         
