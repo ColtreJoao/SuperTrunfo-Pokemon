@@ -49,14 +49,29 @@ def distribuir_cartas(baralho):
 
 #-------------------------------------------------------------------------------------------------
 
-##### Função para jogar uma rodada #####
+historico_partidas = []
+cartas_jogador = []
+cartas_computador = []
+
 def jogar_rodada(carta_jogador, carta_computador, atributo_idx):
+    global historico_partidas
+    
+    if carta_jogador[atributo_idx] > carta_computador[atributo_idx]:
+        resultado = "Você ganhou esta rodada!"
+    elif carta_jogador[atributo_idx] < carta_computador[atributo_idx]:
+        resultado = "Você perdeu esta rodada!"
+    else:
+        resultado = "Empate!"
+    
+    historico_partidas.append(f"{carta_jogador[0]} vs {carta_computador[0]} - {resultado}")
+    
     if carta_jogador[atributo_idx] > carta_computador[atributo_idx]:
         return "jogador"
     elif carta_jogador[atributo_idx] < carta_computador[atributo_idx]:
         return "computador"
     else:
         return "empate"
+
     
 #-------------------------------------------------------------------------------------------------------------
 
@@ -144,7 +159,7 @@ def jogar():
 ##### INTERFACE GRAFICA #####
 tela_inicial = Tk()
 tela_inicial.title("Super Trunfo Pokemon")
-tela_inicial.geometry("1280x720")
+tela_inicial.geometry("1920x1080")
 tela_inicial.resizable(False, False)
 tela_inicial.config(background="Black")
 
@@ -154,22 +169,56 @@ tela_inicial.config(background="Black")
 ##### Tela de Regras #####
 tela_regras = Toplevel(tela_inicial)
 tela_regras.title("Regras do Jogo")
-tela_regras.geometry("1280x720")
+tela_regras.geometry("1920x1080")
 tela_regras.resizable(False, False)
 tela_regras.config(background="Black")
 esconder_janela(tela_regras)
 
 Button(tela_regras, text="Voltar", command=lambda: (esconder_janela(tela_regras), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.03, rely=0.03, anchor=CENTER)
 
+def regras_jogo():
+    esconder_janela(tela_inicial)
+    mostrar_janela(tela_regras)
+
+    # Adicionando o conteúdo das regras
+    Label(tela_regras, text="Regras do Jogo", font=("Georgia", 24), bg="Black", fg="White").pack(pady=20)
+    
+    regras = [
+        "1. O jogador batalha contra um bot.",
+        "1. O jogador recebe metade das cartas do baralho no início do jogo.",
+        "2. Em cada rodada, o jogador escolhe um atributo da carta atual para competir.",
+        "3. O jogador com o valor mais alto no atributo escolhido ganha a rodada e as cartas.",
+        "4. O jogo continua até que um jogador fique sem cartas.",
+        "5. O jogador com mais cartas no final é o vencedor."
+    ]
+    
+    for regra in regras:
+        Label(tela_regras, text=regra, font=("Georgia", 14), bg="Black", fg="White").pack(anchor=W, padx=50)
+
 #-------------------------------------------------------------------------------------------------------------------
 
 ##### Tela de Histórico #####
+def historico():
+    esconder_janela(tela_inicial)
+    mostrar_janela(tela_historico)
+    atualizar_historico()
+
+def atualizar_historico():
+    historico_texto.config(state=NORMAL)
+    historico_texto.delete("1.0", END)
+    for partida in historico_partidas:
+        historico_texto.insert(END, partida + "\n")
+    historico_texto.config(state=DISABLED)
+
 tela_historico = Toplevel(tela_inicial)
 tela_historico.title("Histórico")
-tela_historico.geometry("1280x720")
+tela_historico.geometry("1920x1080")
 tela_historico.resizable(False, False)
 tela_historico.config(background="Black")
 esconder_janela(tela_historico)
+
+historico_texto = Text(tela_historico, font=("Georgia", 14), bg="Black", fg="White", wrap=WORD, state=DISABLED)
+historico_texto.pack(padx=20, pady=20, fill=BOTH, expand=True)
 
 Button(tela_historico, text="Voltar", command=lambda: (esconder_janela(tela_historico), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.03, rely=0.03, anchor=CENTER)
 
@@ -179,7 +228,7 @@ Button(tela_historico, text="Voltar", command=lambda: (esconder_janela(tela_hist
 ##### Tela de Jogar #####
 tela_jogar = Toplevel(tela_inicial)
 tela_jogar.title("Jogar")
-tela_jogar.geometry("1280x720")
+tela_jogar.geometry("1920x1080")
 tela_jogar.resizable(False, False)
 tela_jogar.config(background="Black")
 esconder_janela(tela_jogar)
