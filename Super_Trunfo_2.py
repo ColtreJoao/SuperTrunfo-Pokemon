@@ -53,6 +53,7 @@ carta_atual_computador = None
 atributos = ["nome", "ataque", "defesa", "ataque esp", "defesa esp", "velocidade"]
 resultados = [0, 0, 0]  # [partidas jogadas, partidas ganhas, partidas perdidas]
 
+<<<<<<< HEAD:Super_Trunfo_2.py
 ###### Função para jogar uma rodada ######
 def jogar_rodada(carta_jogador, carta_computador, atributo_idx):
     global historico_partidas, resultados
@@ -68,12 +69,36 @@ def jogar_rodada(carta_jogador, carta_computador, atributo_idx):
 
     historico_partidas.append(f"{carta_jogador[0]} vs {carta_computador[0]} - {resultado}")
 
+=======
+historico_partidas = []
+cartas_jogador = []
+cartas_computador = []
+
+def jogar_rodada(carta_jogador, carta_computador, atributo_idx):
+    global historico_partidas
+    
+    if carta_jogador[atributo_idx] > carta_computador[atributo_idx]:
+        resultado = "Você ganhou esta rodada!"
+    elif carta_jogador[atributo_idx] < carta_computador[atributo_idx]:
+        resultado = "Você perdeu esta rodada!"
+    else:
+        resultado = "Empate!"
+    
+    historico_partidas.append(f"{carta_jogador[0]} vs {carta_computador[0]} - {resultado}")
+    
+>>>>>>> a7ba1fc4a9438fdba483724c94c0a53687457f1b:Super_Trunfo_Tk.py
     if carta_jogador[atributo_idx] > carta_computador[atributo_idx]:
         return "jogador"
     elif carta_jogador[atributo_idx] < carta_computador[atributo_idx]:
         return "computador"
     else:
         return "empate"
+<<<<<<< HEAD:Super_Trunfo_2.py
+=======
+
+    
+#-------------------------------------------------------------------------------------------------------------
+>>>>>>> a7ba1fc4a9438fdba483724c94c0a53687457f1b:Super_Trunfo_Tk.py
 
 ###### Função para iniciar o jogo ######
 def iniciar_jogo():
@@ -175,7 +200,7 @@ def jogar():
 ###### INTERFACE GRÁFICA ######
 tela_inicial = Tk()
 tela_inicial.title("Super Trunfo Pokemon")
-tela_inicial.geometry("1280x720")
+tela_inicial.geometry("1920x1080")
 tela_inicial.resizable(False, False)
 tela_inicial.config(background="Black")
 
@@ -183,12 +208,24 @@ tela_inicial.config(background="Black")
 imagem_inicio1 = PhotoImage(file="imagens/Mewtwo.png").zoom(3, 3)
 img_1 = Label(image=imagem_inicio1, bg="Black")
 
+<<<<<<< HEAD:Super_Trunfo_2.py
 imagem_inicio2 = PhotoImage(file="imagens/mew.png").zoom(3, 3)
 img_2 = Label(image=imagem_inicio2, bg="Black")
+=======
+##### JANELAS AUXILIARES #####
+##### Tela de Regras #####
+tela_regras = Toplevel(tela_inicial)
+tela_regras.title("Regras do Jogo")
+tela_regras.geometry("1920x1080")
+tela_regras.resizable(False, False)
+tela_regras.config(background="Black")
+esconder_janela(tela_regras)
+>>>>>>> a7ba1fc4a9438fdba483724c94c0a53687457f1b:Super_Trunfo_Tk.py
 
 imagem_logo = PhotoImage(file="imagens/logo.png").zoom(1, 1)
 logo = Label(image=imagem_logo, bg="Black")
 
+<<<<<<< HEAD:Super_Trunfo_2.py
 botao_jogar = Button(tela_inicial, text="Jogar", font=("Georgia", 18), bg="Black", fg="White", command=jogar)
 botao_historico = Button(tela_inicial, text="Histórico", font=("Georgia", 18), bg="Black", fg="White", command=historico)
 
@@ -201,22 +238,63 @@ botao_jogar.place(relx=0.5, rely=0.5, anchor=CENTER)
 botao_historico.place(relx=0.5, rely=0.6, anchor=CENTER)
 
 ###### Janela de histórico ######
+=======
+def regras_jogo():
+    esconder_janela(tela_inicial)
+    mostrar_janela(tela_regras)
+
+    # Adicionando o conteúdo das regras
+    Label(tela_regras, text="Regras do Jogo", font=("Georgia", 24), bg="Black", fg="White").pack(pady=20)
+    
+    regras = [
+        "1. O jogador batalha contra um bot.",
+        "1. O jogador recebe metade das cartas do baralho no início do jogo.",
+        "2. Em cada rodada, o jogador escolhe um atributo da carta atual para competir.",
+        "3. O jogador com o valor mais alto no atributo escolhido ganha a rodada e as cartas.",
+        "4. O jogo continua até que um jogador fique sem cartas.",
+        "5. O jogador com mais cartas no final é o vencedor."
+    ]
+    
+    for regra in regras:
+        Label(tela_regras, text=regra, font=("Georgia", 14), bg="Black", fg="White").pack(anchor=W, padx=50)
+
+#-------------------------------------------------------------------------------------------------------------------
+
+##### Tela de Histórico #####
+def historico():
+    esconder_janela(tela_inicial)
+    mostrar_janela(tela_historico)
+    atualizar_historico()
+
+def atualizar_historico():
+    historico_texto.config(state=NORMAL)
+    historico_texto.delete("1.0", END)
+    for partida in historico_partidas:
+        historico_texto.insert(END, partida + "\n")
+    historico_texto.config(state=DISABLED)
+
+>>>>>>> a7ba1fc4a9438fdba483724c94c0a53687457f1b:Super_Trunfo_Tk.py
 tela_historico = Toplevel(tela_inicial)
 tela_historico.title("Histórico")
-tela_historico.geometry("1280x720")
+tela_historico.geometry("1920x1080")
 tela_historico.resizable(False, False)
 tela_historico.config(background="Black")
 esconder_janela(tela_historico)
 
 historico_texto = Text(tela_historico, font=("Georgia", 14), bg="Black", fg="White", wrap=WORD, state=DISABLED)
 historico_texto.pack(padx=20, pady=20, fill=BOTH, expand=True)
+<<<<<<< HEAD:Super_Trunfo_2.py
+=======
+
+Button(tela_historico, text="Voltar", command=lambda: (esconder_janela(tela_historico), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.03, rely=0.03, anchor=CENTER)
+>>>>>>> a7ba1fc4a9438fdba483724c94c0a53687457f1b:Super_Trunfo_Tk.py
 
 Button(tela_historico, text="Voltar", command=lambda: (esconder_janela(tela_historico), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.95, rely=0.06, anchor=CENTER)
 
 ###### Janela para jogar ######
 tela_jogar = Toplevel(tela_inicial)
 tela_jogar.title("Jogar")
-tela_jogar.geometry("1280x720")
+tela_jogar.geometry("1920x1080")
 tela_jogar.resizable(False, False)
 tela_jogar.config(background="Black")
 esconder_janela(tela_jogar)
