@@ -1,10 +1,9 @@
 import random
+import json
 from tkinter import *
 from tkinter import messagebox
 
-#------------------------------------------------------------------------------------------------------------------------
-
-##### Função que cria as cartas do jogo e suas imagens #####
+###### Função que cria as cartas do jogo e suas imagens ######
 def cartas_baralho():
     return [
         ["Venusaur", 82, 83, 100, 100, 80, "imagens/Venusaur.png"],
@@ -29,52 +28,66 @@ def cartas_baralho():
         ["Cloyster", 95, 180, 85, 45, 70, "imagens/Cloyster.png"],
         ["Rapidash", 100, 70, 80, 80, 105, "imagens/Rapidash.png"],
         ["Marowak", 80, 110, 50, 80, 45, "imagens/Marowak.png"],
-        ["Hitmonlee", 120, 53, 35, 110, 87, "imagens/Hitmonlee.png"],
-        ["Hitmonchan", 105, 79, 35, 110, 76, "imagens/Hitmonchan.png"],
+        ["Hitmonlee", 120, 53, 35, 110, 87, "imagens/Lee.png"],
+        ["Hitmonchan", 105, 79, 35, 110, 76, "imagens/Chan.png"],
         ["Starmie", 75, 85, 100, 85, 115, "imagens/Starmie.png"],
         ["Gyarados", 125, 79, 60, 100, 81, "imagens/Gyarados.png"],
         ["Snorlax", 110, 65, 65, 110, 30, "imagens/Snorlax.png"],
         ["Dragonite", 134, 95, 100, 100, 80, "imagens/Dragonite.png"],
-        ["Mr.Mime", 45, 65, 100, 120, 90, "imagens/MrMime.png"],
+        ["Mr.Mime", 45, 65, 100, 120, 90, "imagens/Mr.mime.png"],
         ["Mewtwo", 110, 100, 190, 90, 150, "imagens/Mewtwo.png"],
     ]
-    
-#-----------------------------------------------------------------------------------------------------------
 
-###### Função para distribuir as cartas entre os jogadores #####
+###### Função para distribuir as cartas entre os jogadores ######
 def distribuir_cartas(baralho):
     random.shuffle(baralho)
     metade = len(baralho) // 2
     return baralho[:metade], baralho[metade:]
 
-#-------------------------------------------------------------------------------------------------
+###### Variáveis globais ######
+historico_partidas = []
+cartas_jogador = []
+cartas_computador = []
+carta_atual_jogador = None
+carta_atual_computador = None
+atributos = ["nome", "ataque", "defesa", "ataque esp", "defesa esp", "velocidade"]
+resultados = [0, 0, 0]  # [partidas jogadas, partidas ganhas, partidas perdidas]
 
-##### Função para jogar uma rodada #####
+###### Função para jogar uma rodada ######
 def jogar_rodada(carta_jogador, carta_computador, atributo_idx):
+    global historico_partidas, resultados
+
+    if carta_jogador[atributo_idx] > carta_computador[atributo_idx]:
+        resultado = "Você ganhou esta rodada!"
+        resultados[1] += 1
+    elif carta_jogador[atributo_idx] < carta_computador[atributo_idx]:
+        resultado = "Você perdeu esta rodada!"
+        resultados[2] += 1
+    else:
+        resultado = "Empate!"
+
+    historico_partidas.append(f"{carta_jogador[0]} vs {carta_computador[0]} - {resultado}")
+
     if carta_jogador[atributo_idx] > carta_computador[atributo_idx]:
         return "jogador"
     elif carta_jogador[atributo_idx] < carta_computador[atributo_idx]:
         return "computador"
     else:
         return "empate"
-    
-#-------------------------------------------------------------------------------------------------------------
 
-##### Função para iniciar o jogo #####
+###### Função para iniciar o jogo ######
 def iniciar_jogo():
-    global cartas_jogador, cartas_computador, carta_atual_jogador, carta_atual_computador, atributos
+    global cartas_jogador, cartas_computador, carta_atual_jogador, carta_atual_computador
 
     baralho = cartas_baralho()
     cartas_jogador, cartas_computador = distribuir_cartas(baralho)
     carta_atual_jogador = cartas_jogador.pop(0)
     carta_atual_computador = cartas_computador.pop(0)
-    atributos = ["nome", "ataque", "defesa", "ataque esp", "defesa esp", "velocidade"]
-
-    atualizar_interface()
     
-#---------------------------------------------------------------------------------------------------------------------------
+    resultados[0] += 1  # Incrementa partidas jogadas
+    atualizar_interface()
 
-##### Função para atualizar a interface do jogo #####
+###### Função para atualizar a interface do jogo ######
 def atualizar_interface():
     global carta_atual_jogador
 
@@ -82,10 +95,8 @@ def atualizar_interface():
     carta_img = PhotoImage(file=carta_atual_jogador[6])
     carta_jogador_img_label.config(image=carta_img)
     carta_jogador_img_label.image = carta_img
-    
-# -----------------------------------------------------------------------------------------------------------------------
 
-##### Função para selecionar o atributo e jogar a rodada #####
+###### Função para selecionar o atributo e jogar a rodada ######
 def selecionar_atributo(atributo):
     global carta_atual_jogador, carta_atual_computador, cartas_jogador, cartas_computador
 
@@ -114,56 +125,82 @@ def selecionar_atributo(atributo):
             messagebox.showinfo("Fim de Jogo", "Você perdeu o jogo!")
         else:
             messagebox.showinfo("Fim de Jogo", "Você ganhou o jogo!")
+        salvar_historico()
         esconder_janela(tela_jogar)
         mostrar_janela(tela_inicial)
-        
-# ---------------------------------------------------------------------------------------------------        
 
-##### Funções para mostrar e esconder janelas #####
+###### Função para salvar o histórico em um arquivo JSON ######
+def salvar_historico():
+    with open('historico.json', 'w') as f:
+        json.dump(historico_partidas, f)
+
+###### Função para carregar o histórico de um arquivo JSON #####
+def carregar_historico():
+    global historico_partidas
+    try:
+        with open('historico.json', 'r') as f:
+            historico_partidas = json.load(f)
+    except FileNotFoundError:
+        historico_partidas = []
+
+###### Função para exibir o histórico na interface gráfica ######
+def atualizar_historico():
+    historico_texto.config(state=NORMAL)
+    historico_texto.delete("1.0", END)
+    for partida in historico_partidas:
+        historico_texto.insert(END, partida + "\n")
+    historico_texto.config(state=DISABLED)
+
+##### Funções para mostrar e esconder janelas ######
 def mostrar_janela(janela):
     janela.deiconify()
-    
+
 def esconder_janela(janela):
     janela.withdraw()
 
+###### Funções relacionadas às janelas ######
 def regras_jogo():
     esconder_janela(tela_inicial)
-    mostrar_janela(tela_regras)
 
 def historico():
     esconder_janela(tela_inicial)
     mostrar_janela(tela_historico)
+    atualizar_historico()
 
 def jogar():
     esconder_janela(tela_inicial)
     mostrar_janela(tela_jogar)
     iniciar_jogo()
-    
-# ------------------------------------------------------------------------------------------------
 
-##### INTERFACE GRAFICA #####
+###### INTERFACE GRÁFICA ######
 tela_inicial = Tk()
 tela_inicial.title("Super Trunfo Pokemon")
 tela_inicial.geometry("1280x720")
 tela_inicial.resizable(False, False)
 tela_inicial.config(background="Black")
 
-#-------------------------------------------------------------------------------------------------
+###### Componentes da tela inicial ######
+imagem_inicio1 = PhotoImage(file="imagens/Mewtwo.png").zoom(3, 3)
+img_1 = Label(image=imagem_inicio1, bg="Black")
 
-##### JANELAS AUXILIARES #####
-##### Tela de Regras #####
-tela_regras = Toplevel(tela_inicial)
-tela_regras.title("Regras do Jogo")
-tela_regras.geometry("1280x720")
-tela_regras.resizable(False, False)
-tela_regras.config(background="Black")
-esconder_janela(tela_regras)
+imagem_inicio2 = PhotoImage(file="imagens/mew.png").zoom(3, 3)
+img_2 = Label(image=imagem_inicio2, bg="Black")
 
-Button(tela_regras, text="Voltar", command=lambda: (esconder_janela(tela_regras), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.03, rely=0.03, anchor=CENTER)
+imagem_logo = PhotoImage(file="imagens/logo.png").zoom(1, 1)
+logo = Label(image=imagem_logo, bg="Black")
 
-#-------------------------------------------------------------------------------------------------------------------
+botao_jogar = Button(tela_inicial, text="Jogar", font=("Georgia", 18), bg="Black", fg="White", command=jogar)
+botao_historico = Button(tela_inicial, text="Histórico", font=("Georgia", 18), bg="Black", fg="White", command=historico)
 
-##### Tela de Histórico #####
+
+###### Posicionamento dos componentes na tela inicial ######
+img_1.place(relx=0.2, rely=0.5, anchor=CENTER)
+img_2.place(relx=0.9, rely=0.5, anchor=CENTER)
+logo.place(relx=0.5, rely=0.25, anchor=CENTER)
+botao_jogar.place(relx=0.5, rely=0.5, anchor=CENTER)
+botao_historico.place(relx=0.5, rely=0.6, anchor=CENTER)
+
+###### Janela de histórico ######
 tela_historico = Toplevel(tela_inicial)
 tela_historico.title("Histórico")
 tela_historico.geometry("1280x720")
@@ -171,12 +208,12 @@ tela_historico.resizable(False, False)
 tela_historico.config(background="Black")
 esconder_janela(tela_historico)
 
-Button(tela_historico, text="Voltar", command=lambda: (esconder_janela(tela_historico), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.03, rely=0.03, anchor=CENTER)
+historico_texto = Text(tela_historico, font=("Georgia", 14), bg="Black", fg="White", wrap=WORD, state=DISABLED)
+historico_texto.pack(padx=20, pady=20, fill=BOTH, expand=True)
 
-#--------------------------------------------------------------------------------------------------------
+Button(tela_historico, text="Voltar", command=lambda: (esconder_janela(tela_historico), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.95, rely=0.06, anchor=CENTER)
 
-
-##### Tela de Jogar #####
+###### Janela para jogar ######
 tela_jogar = Toplevel(tela_inicial)
 tela_jogar.title("Jogar")
 tela_jogar.geometry("1280x720")
@@ -184,49 +221,20 @@ tela_jogar.resizable(False, False)
 tela_jogar.config(background="Black")
 esconder_janela(tela_jogar)
 
-Button(tela_jogar, text="Voltar", command=lambda: (esconder_janela(tela_jogar), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.03, rely=0.03, anchor=CENTER)
-
+Button(tela_jogar, text="Voltar", command=lambda: (esconder_janela(tela_jogar), mostrar_janela(tela_inicial)), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.95, rely=0.06, anchor=CENTER)
 
 carta_jogador_label = Label(tela_jogar, text="", font=("Georgia", 18), bg="Black", fg="White")
-carta_jogador_label.place(relx=0.5, rely=0.3, anchor=CENTER)
+carta_jogador_label.place(relx=0.6, rely=0.3, anchor=CENTER)
 
 carta_jogador_img_label = Label(tela_jogar, bg="Black")
-carta_jogador_img_label.place(relx=0.5, rely=0.5, anchor=CENTER)
+carta_jogador_img_label.place(relx=0.4, rely=0.3, anchor=CENTER)
 
 Button(tela_jogar, text="Ataque", command=lambda: selecionar_atributo("ataque"), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.3, rely=0.7, anchor=CENTER)
 Button(tela_jogar, text="Defesa", command=lambda: selecionar_atributo("defesa"), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.5, rely=0.7, anchor=CENTER)
 Button(tela_jogar, text="Ataque Esp", command=lambda: selecionar_atributo("ataque esp"), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.7, rely=0.7, anchor=CENTER)
-Button(tela_jogar, text="Defesa Esp", command=lambda: selecionar_atributo("defesa esp"), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.3, rely=0.8, anchor=CENTER)
-Button(tela_jogar, text="Velocidade", command=lambda: selecionar_atributo("velocidade"), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.5, rely=0.8, anchor=CENTER)
+Button(tela_jogar, text="Defesa Esp", command=lambda: selecionar_atributo("defesa esp"), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.4, rely=0.8, anchor=CENTER)
+Button(tela_jogar, text="Velocidade", command=lambda: selecionar_atributo("velocidade"), font=("Georgia", 18), bg="Black", fg="White").place(relx=0.6, rely=0.8, anchor=CENTER)
 
-#--------------------------------------------------------------------------------------------------------
-
-##### COMPONENTES #####
-imagem_inicio1 = PhotoImage(file="imagens/Mewtwo.png")
-imagem_inicio1 = imagem_inicio1.zoom(3, 3)
-img_1 = Label(image=imagem_inicio1, bg="Black")
-
-imagem_inicio2 = PhotoImage(file="imagens/mew.png")
-imagem_inicio2 = imagem_inicio2.zoom(3, 3)
-img_2 = Label(image=imagem_inicio2, bg="Black")
-
-imagem = PhotoImage(file="imagens/logo.png")
-imagem = imagem.zoom(1, 1)
-logo = Label(image=imagem, bg="Black")
-
-botao_jogar = Button(tela_inicial, text="Jogar", font=("Georgia", 18), bg="Black", fg="White", command=jogar)
-botao_historico = Button(tela_inicial, text="Histórico", font=("Georgia", 18), bg="Black", fg="White", command=historico)
-botao_regras = Button(tela_inicial, text="Regras", font=("Georgia", 18), bg="Black", fg="White", command=regras_jogo)
-
-#--------------------------------------------------------------------------------------------------------
-
-##### CENTRALIZANDO OS COMPONENTES #####
-img_1.place(relx=0.2, rely=0.5, anchor=CENTER)
-img_2.place(relx=0.9, rely=0.5, anchor=CENTER)
-logo.place(relx=0.5, rely=0.25, anchor=CENTER)
-
-botao_jogar.place(relx=0.5, rely=0.5, anchor=CENTER)
-botao_historico.place(relx=0.5, rely=0.6, anchor=CENTER)
-botao_regras.place(relx=0.5, rely=0.7, anchor=CENTER)
-
+###### Iniciar a aplicação ######
+carregar_historico()
 tela_inicial.mainloop()
